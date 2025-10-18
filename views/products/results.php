@@ -7,11 +7,29 @@
  * 
  * @package Views/Products
  * @author Akshay
- * @version 1.0
+ * @version 2.0
+ * 
+ * @improvements Dynamic asset base, file existence checks, safe fallbacks
+ * @robustness Handles missing files and data gracefully
  */
 
 // Start output buffering to capture rendered content
 ob_start();
+
+// Compute asset base like layout does so this works on Render (public docroot) and local dev
+$isRender = getenv('RENDER') === 'true';
+$assetBase = $isRender ? '/assets' : rtrim(BASE_URL, '/') . '/public/assets';
+
+// Determine uploaded image URL with server-side existence check
+$searchImageFile = $searchImage ?? '';
+$uploadsServerPath = PUBLIC_PATH . '/assets/uploads/' . $searchImageFile;
+if ($searchImageFile && file_exists($uploadsServerPath)) {
+    // Use rawurlencode for safe URLs if filename has spaces/special chars
+    $searchImageUrl = $assetBase . '/uploads/' . rawurlencode($searchImageFile);
+} else {
+    // Fallback placeholder (avoids broken image icon)
+    $searchImageUrl = 'https://placehold.co/240x240/E8E8E8/444?text=Search+Image';
+}
 ?>
 
 <!-- Main Results Container -->
@@ -31,12 +49,12 @@ ob_start();
         <!-- Action Buttons Container -->
         <div class="flex justify-center gap-4 mb-8">
             <!-- New Search Action -->
-            <a href="/image-search-ecommerce/public/" 
+            <a href="<?php echo rtrim(BASE_URL, '/'); ?>/" 
                class="bg-gray-800 text-white px-8 py-3 uppercase tracking-wider font-semibold hover:bg-gray-700 transition duration-300 inline-block">
                 🔄 New Search
             </a>
             <!-- Back to Catalog Action -->
-            <a href="/image-search-ecommerce/public/" 
+            <a href="<?php echo rtrim(BASE_URL, '/'); ?>/" 
                class="bg-[#E3E1DC] text-gray-800 border border-gray-300 px-8 py-3 uppercase tracking-wider font-semibold hover:bg-gray-200 transition duration-300 inline-block">
                 ← Back to All Products
             </a>
@@ -55,9 +73,10 @@ ob_start();
             <!-- Uploaded Image Display -->
             <div class="text-center">
                 <h3 class="font-semibold text-lg mb-4 text-gray-900">YOUR SEARCH IMAGE</h3>
-                <!-- User's Uploaded Image -->
-                <img src="/image-search-ecommerce/public/assets/uploads/<?php echo htmlspecialchars($searchImage); ?>" 
-                     alt="Search image" class="h-60 w-60 object-cover border border-gray-200 shadow-sm">
+                <!-- User's Uploaded Image with Fallback -->
+                <img src="<?php echo htmlspecialchars($searchImageUrl); ?>"
+                     alt="Search image" class="h-60 w-60 object-cover border border-gray-200 shadow-sm"
+                     onerror="this.onerror=null;this.src='https://placehold.co/240x240/E8E8E8/444?text=Search+Image'">
             </div>
             
             <!-- AI Analysis Results -->
@@ -73,7 +92,7 @@ ob_start();
                         <span class="font-medium text-gray-700">Detected Pattern:</span>
                         <!-- Pattern Badge -->
                         <span class="bg-gray-900 text-white px-3 py-1 text-sm ml-2 font-semibold uppercase rounded">
-                            <?= htmlspecialchars($analysis['detected_pattern']); ?>
+                            <?= htmlspecialchars($analysis['detected_pattern'] ?? 'N/A'); ?>
                         </span>
                     </div>
                     
@@ -82,7 +101,7 @@ ob_start();
                         <span class="font-medium text-gray-700">Confidence Score:</span>
                         <!-- Confidence Percentage Badge -->
                         <span class="bg-green-600 text-white px-3 py-1 text-sm ml-2 font-semibold rounded">
-                            <?= number_format($analysis['confidence'] * 100, 1); ?>%
+                            <?= isset($analysis['confidence']) ? number_format($analysis['confidence'] * 100, 1) . '%' : 'N/A'; ?>
                         </span>
                     </div>
                     
@@ -91,7 +110,7 @@ ob_start();
                         <span class="font-medium text-gray-700">Dominant Colors:</span>
                         <!-- Color List Display -->
                         <span class="text-sm ml-2 font-semibold text-gray-800">
-                            <?= htmlspecialchars(implode(', ', $analysis['dominant_colors'])); ?>
+                            <?= htmlspecialchars(!empty($analysis['dominant_colors']) ? implode(', ', $analysis['dominant_colors']) : 'N/A'); ?>
                         </span>
                     </div>
                     
@@ -100,7 +119,7 @@ ob_start();
                         <span class="font-medium text-gray-700">Category:</span>
                         <!-- Category Badge -->
                         <span class="text-sm ml-2 font-semibold text-gray-800 uppercase">
-                            <?= htmlspecialchars($analysis['category']); ?>
+                            <?= htmlspecialchars($analysis['category'] ?? 'N/A'); ?>
                         </span>
                     </div>
                 </div>
@@ -110,7 +129,7 @@ ob_start();
                      ================================================================== -->
                 
                 <!-- Collapsible Debug Information -->
-                <?php if (isset($analysis['raw_analysis'])): ?>
+                <?php if (!empty($analysis['raw_analysis'])): ?>
                     <details class="bg-gray-100 border border-gray-300 p-4 rounded mt-4">
                         <!-- Debug Panel Summary -->
                         <summary class="cursor-pointer font-semibold text-gray-700">
@@ -202,7 +221,7 @@ ob_start();
                 <p class="text-gray-500 mb-6">Try uploading a different image or check back later for more products.</p>
                 
                 <!-- Retry Action -->
-                <a href="/" class="bg-gray-900 text-white px-8 py-3 uppercase tracking-wider font-semibold hover:bg-gray-700 transition duration-300 inline-block">
+                <a href="<?php echo rtrim(BASE_URL, '/'); ?>/" class="bg-gray-900 text-white px-8 py-3 uppercase tracking-wider font-semibold hover:bg-gray-700 transition duration-300 inline-block">
                     New Search
                 </a>
             </div>
