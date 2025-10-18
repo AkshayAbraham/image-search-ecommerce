@@ -12,6 +12,10 @@ if (!defined('PUBLIC_PATH')) {
 // Load environment variables
 require_once BASE_PATH . '/app/core/Env.php';
 Env::load();
+
+// Detect Render environment for dynamic BASE_URL
+$isRender = getenv('RENDER') === 'true';
+
 // Windows compatibility: If .env doesn't exist but example.env does, use it for local dev
 if (!file_exists(BASE_PATH . '/.env') && file_exists(BASE_PATH . '/example.env') && !$isRender) {
     echo "<!-- Development Note: Using example.env for local setup -->";
