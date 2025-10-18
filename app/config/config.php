@@ -10,7 +10,7 @@ if (!defined('PUBLIC_PATH')) {
 }
 
 // Load environment variables
-require_once BASE_PATH . '/app/core/Env.php';
+require_once BASE_PATH . '/app/core/env.php';
 Env::load();
 
 // Detect Render environment for dynamic BASE_URL
