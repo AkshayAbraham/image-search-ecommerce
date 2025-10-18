@@ -14,6 +14,8 @@ require_once BASE_PATH . '/app/core/env.php';
 
 // Detect Render environment for dynamic BASE_URL
 $isRender = getenv('RENDER') === 'true';
+// expose as constant if you want other templates to read it
+define('IS_RENDER', $isRender);
 
 // Only try to load .env file if we're NOT on Render AND the file exists
 if (!$isRender && file_exists(BASE_PATH . '/.env')) {
