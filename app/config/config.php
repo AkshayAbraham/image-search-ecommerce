@@ -9,23 +9,27 @@ if (!defined('PUBLIC_PATH')) {
     define('PUBLIC_PATH', BASE_PATH . '/public');
 }
 
-// Load environment variables
+// Load environment class
 require_once BASE_PATH . '/app/core/env.php';
-Env::load();
 
 // Detect Render environment for dynamic BASE_URL
 $isRender = getenv('RENDER') === 'true';
 
-// Windows compatibility: If .env doesn't exist but example.env does, use it for local dev
-if (!file_exists(BASE_PATH . '/.env') && file_exists(BASE_PATH . '/example.env') && !$isRender) {
+// Only try to load .env file if we're NOT on Render AND the file exists
+if (!$isRender && file_exists(BASE_PATH . '/.env')) {
+    Env::load();
+} elseif (!$isRender && file_exists(BASE_PATH . '/example.env')) {
+    // Windows compatibility for local development only
     echo "<!-- Development Note: Using example.env for local setup -->";
     Env::load(BASE_PATH . '/example.env');
 }
-// Detect Render environment for dynamic BASE_URL
-$isRender = getenv('RENDER') === 'true';
+// On Render, we rely on environment variables set in the dashboard
+
+// Fetch APP_ENV without triggering Env::load() on Render
+$appEnv = $isRender ? (getenv('APP_ENV') ?: 'production') : Env::get('APP_ENV', 'development');
 
 // Application Constants from .env with fallbacks
-define('APP_NAME', Env::get('APP_NAME', 'Image Search E-commerce'));
+define('APP_NAME', $isRender ? (getenv('APP_NAME') ?: 'Image Search E-commerce') : Env::get('APP_NAME', 'Image Search E-commerce'));
 
 // Dynamic BASE_URL for Render vs local development
 if ($isRender) {
@@ -37,35 +41,27 @@ if ($isRender) {
 }
 
 define('UPLOAD_PATH', PUBLIC_PATH . '/assets/uploads/');
-define('MAX_FILE_SIZE', (int) Env::get('MAX_FILE_SIZE', 2 * 1024 * 1024)); // 2MB
+define('MAX_FILE_SIZE', (int) ($isRender ? (getenv('MAX_FILE_SIZE') ?: 2 * 1024 * 1024) : Env::get('MAX_FILE_SIZE', 2 * 1024 * 1024))); // 2MB
 define('ALLOWED_TYPES', ['jpg', 'jpeg', 'png', 'gif']);
 
-// Groq API Configuration from .env
-define('GROQ_API_KEY', Env::get('GROQ_API_KEY'));
-define('GROQ_API_URL', Env::get('GROQ_API_URL', 'https://api.groq.com/openai/v1/chat/completions'));
-define('GROQ_MODEL', Env::get('GROQ_MODEL', 'llama-3.2-90b-vision-preview'));
+// Groq API Configuration from .env or platform env vars
+define('GROQ_API_KEY', $isRender ? getenv('GROQ_API_KEY') : Env::get('GROQ_API_KEY'));
+define('GROQ_API_URL', $isRender ? (getenv('GROQ_API_URL') ?: 'https://api.groq.com/openai/v1/chat/completions') : Env::get('GROQ_API_URL', 'https://api.groq.com/openai/v1/chat/completions'));
+define('GROQ_MODEL', $isRender ? (getenv('GROQ_MODEL') ?: 'llama-3.2-90b-vision-preview') : Env::get('GROQ_MODEL', 'llama-3.2-90b-vision-preview'));
 
 // Validate required Groq configuration with better error handling
 if (empty(GROQ_API_KEY) || GROQ_API_KEY === 'your_actual_groq_api_key_here') {
-    if ($isRender) {
-        // On Render, check if it might be set via environment variable directly
-        $directEnvKey = getenv('GROQ_API_KEY');
-        if ($directEnvKey && $directEnvKey !== 'your_actual_groq_api_key_here') {
-            // Update the constant if found in direct environment
-            define('GROQ_API_KEY', $directEnvKey);
-        } else {
-            die("❌ Error: GROQ_API_KEY not properly configured in Render environment variables. Please add GROQ_API_KEY to your Render dashboard.");
-        }
-    } else {
-        die("❌ Error: GROQ_API_KEY not properly configured in .env file. Please check your .env configuration.");
-    }
+    die("❌ Error: GROQ_API_KEY not properly configured. " . 
+        ($isRender ? 
+            "Please add GROQ_API_KEY to your Render dashboard environment variables." : 
+            "Please check your .env configuration."));
 }
 
 // Create required directories
 $directories = [
     UPLOAD_PATH,
     BASE_PATH . '/views/products',
-    BASE_PATH . '/views/layouts', 
+    BASE_PATH . '/views/layouts',
     BASE_PATH . '/public/assets/css',
     BASE_PATH . '/public/assets/js',
     BASE_PATH . '/public/assets/uploads'
@@ -83,7 +79,7 @@ if (is_dir(UPLOAD_PATH) && !is_writable(UPLOAD_PATH)) {
 }
 
 // Error reporting - more conservative in production
-if ($isRender || Env::get('APP_ENV') === 'production') {
+if ($isRender || $appEnv === 'production') {
     error_reporting(E_ALL);
     ini_set('display_errors', 0); // Don't show errors to users in production
     ini_set('log_errors', 1);
