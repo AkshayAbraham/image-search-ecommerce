@@ -30,7 +30,3 @@ Thumbs.db
 
 # User-uploaded images (empty directory)
 public/assets/uploads/
-
-# KEEP DATABASE AND PRODUCT IMAGES FOR PORTFOLIO
-# *.sqlite  <-- COMMENT OUT
-# *.db      <-- COMMENT OUT

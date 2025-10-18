@@ -1,0 +1,14 @@
+# render.yaml
+services:
+  - type: web
+    name: image-search-ecommerce
+    env: php
+    plan: free
+    buildCommand: |
+      echo "PHP application - no build needed"
+    startCommand: |
+      php -S 0.0.0.0:$PORT -t public
+    envVars:
+      - key: APP_ENV
+        value: production
+      
