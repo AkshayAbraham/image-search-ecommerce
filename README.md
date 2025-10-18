@@ -1,4 +1,7 @@
 # 🤖AI-powered Fashion E‑commerce — Image Search
+[![PHP](https://img.shields.io/badge/PHP-8.x-777BB4?logo=php)](https://php.net)
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Live Demo](https://img.shields.io/badge/Demo-Live-brightgreen)](https://image-search-ecommerce.onrender.com)
 
 This project is a technical mockup demonstrating the integration of a modern Visual Search feature into an E-commerce application, built using the PHP Model-View-Controller (MVC) architectural pattern.
 
@@ -11,6 +14,7 @@ Table of contents📋
 - [Screenshots](#screenshots)
 - [Key features & highlights](#key-features--highlights)
 - [Technology stack](#technology-stack)
+- [MVC Architecture Implementation](#mvc-architecture-implementation)
 - [Architecture & data flow](architecture--data-flow)
 - [Getting started (local development)](#getting-started-local-development)
   - [Prerequisites](#prerequisites)
@@ -21,13 +25,14 @@ Table of contents📋
   - [Visual search workflow](#visual-search-workflow)
   - [Example API endpoints](#example-api-endpoints)
 - [License](#license)
+- [References](#references)
 - [Contact](#contact)
 - [Appendix: Project Story & Context](#appendix:-project-story--context)
 ---
 
 ## Overview
 --------
-This project was developed as a technical demonstration for a PHP Developer position. After researching Brantree Boutique 's e-commerce platform (developed by WebsiteNI), I identified an opportunity to enhance user experience through visual search capabilities.This mockup addresses the need for a visually engaging, modern eCommerce website with improved navigation and functionality to increase online sales.
+This project was developed as a technical demonstration for a PHP Developer position. After researching [Brantree Boutique](https://www.brantreeedit.com/) 's e-commerce platform (developed by [WebsiteNI](https://websiteni.com/project/brantree-boutique/)), I identified an opportunity to enhance user experience through visual search capabilities.This mockup addresses the need for a visually engaging, modern eCommerce website with improved navigation and functionality to increase online sales.
 
 **Key Challenges Addressed:**
 - Modernized traditional text-based search
@@ -62,6 +67,62 @@ Primary languages and technologies used in the repository:
 - CSS (styling)
 - Docker (For deployment)
 - Groq AI (embeddings / visual search provider)
+
+  ## MVC Architecture Implementation
+
+This project follows the **Model-View-Controller (MVC)** pattern with a clean separation of concerns.
+```
+project/
+│   .env                    # Environment variables
+│   Dockerfile              # Container configuration
+│   LICENSE                 # MIT License
+│   README.md               # Project documentation
+│   
+├───app/                    # Application Core (MVC)
+│   ├───config/             # Configuration files
+│   │       config.php      # App configuration
+│   │
+│   ├───controllers/        # Controllers (C)
+│   │       ProductController.php  # Handles product-related requests
+│   │
+│   ├───core/               # Framework core classes
+│   │       Controller.php  # Base controller class
+│   │       Database.php    # Database abstraction layer
+│   │       Model.php       # Base model class
+│   │
+│   ├───models/             # Models (M)
+│   │       Product.php     # Product business logic & data
+│   │
+│   └───services/           # Business logic services
+│           GroqService.php # AI integration service
+│
+├───database/               # Database related files
+│       database.sqlite     # SQLite database
+│       schema.sql          # Database schema
+│
+├───public/                 # Web root (publicly accessible)
+│   │   index.php          # Front controller - all requests routed here
+│   │
+│   └───assets/            # Static assets
+│       ├───css/           # Stylesheets
+│       ├───js/            # JavaScript files
+│       └───uploads/       # User uploaded images
+│
+├───screenshots/           # Project documentation images
+│       demo_image.png
+│
+└───views/                 # Views (V) - Presentation layer
+    ├───layouts/           # Layout templates
+    │       main.php       # Main layout wrapper
+    │
+    ├───partials/          # Reusable components
+    │       footer.php     # Page footer
+    │       header.php     # Page header
+    │
+    └───products/          # Product-related views
+            index.php      # Product listing page
+            results.php    # Search results page
+```
 
 ## Architecture & data flow 
 ------------------------
@@ -141,6 +202,10 @@ Create a .env (or configure your container) with keys similar to:
 ## License 
 This project is licensed under the MIT License - see the `LICENSE` file for details. 📝
 
+## References
+- **WebsiteNI Brantree Boutique Case Study**: [https://websiteni.com/project/brantree-boutique/](https://websiteni.com/project/brantree-boutique/)
+- **Brantree Boutique**: [https://www.brantreeedit.com/](https://www.brantreeedit.com/)
+
 ## Contact
 
 - Author: Akshay Abraham
@@ -179,7 +244,7 @@ This implementation uses **Groq's general-purpose AI model**, which isn't specif
 
 *</small>*
 
-Thank you for reviewing this project — feel free to reach out for a walkthrough or live demo.
+Thank you for reviewing this project😃
 
 
 
