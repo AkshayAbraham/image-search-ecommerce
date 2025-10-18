@@ -5,5 +5,8 @@ RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
+# Don't rewrite assets (CSS, JS, images)
+RewriteCond %{REQUEST_URI} !\.(css|js|jpg|jpeg|png|gif|ico|svg|woff|woff2|ttf|eot)$ [NC]
+
 # Otherwise, route everything to index.php
 RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]

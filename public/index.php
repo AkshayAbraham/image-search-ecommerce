@@ -55,6 +55,64 @@ session_start();
 require_once BASE_PATH . '/app/config/config.php';
 
 // =============================================================================
+// STATIC ASSET HANDLING
+// =============================================================================
+
+/**
+ * Serve Static Assets Directly
+ * 
+ * Checks if the request is for static assets (CSS, JS, images)
+ * Serves files directly without routing through MVC system
+ * Essential for proper JavaScript and CSS file loading
+ * 
+ * @performance Direct file serving for better performance
+ * @compatibility Ensures JavaScript functions load correctly
+ */
+$requestUri = $_SERVER['REQUEST_URI'];
+$isAsset = preg_match('/\.(css|js|jpg|jpeg|png|gif|ico|svg|woff|woff2|ttf|eot)$/i', $requestUri);
+
+if ($isAsset) {
+    /**
+     * Static File Serving Logic
+     * 
+     * Determines file path and serves with appropriate MIME type
+     * Handles 404 responses for missing static files
+     */
+    $filePath = PUBLIC_PATH . $requestUri;
+    
+    if (file_exists($filePath)) {
+        // Define MIME types for proper browser handling
+        $mimeTypes = [
+            'css' => 'text/css',
+            'js' => 'application/javascript',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'ico' => 'image/x-icon',
+            'svg' => 'image/svg+xml',
+            'woff' => 'font/woff',
+            'woff2' => 'font/woff2',
+            'ttf' => 'font/ttf',
+            'eot' => 'application/vnd.ms-fontobject'
+        ];
+        
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        if (isset($mimeTypes[$extension])) {
+            header('Content-Type: ' . $mimeTypes[$extension]);
+        }
+        
+        // Serve the file directly
+        readfile($filePath);
+    } else {
+        // File not found - return 404
+        http_response_code(404);
+        echo "Static file not found: " . htmlspecialchars($requestUri);
+    }
+    exit;
+}
+
+// =============================================================================
 // CORE DEPENDENCY LOADING
 // =============================================================================
 
@@ -71,7 +129,6 @@ require_once BASE_PATH . '/app/core/Database.php';      // Database abstraction 
 require_once BASE_PATH . '/app/core/Model.php';         // Base model class
 require_once BASE_PATH . '/app/core/Controller.php';    // Base controller class
 require_once BASE_PATH . '/app/services/GroqService.php'; // AI image analysis service
-require_once BASE_PATH . '/app/config/config.php';      // Additional configuration
 
 // =============================================================================
 // URL PARSING AND ROUTING LOGIC
@@ -187,5 +244,5 @@ if (file_exists($controllerPath)) {
      */
     echo "<h1>Welcome to Image Search E-commerce</h1>";
     echo "<p>Controller '{$controllerName}' not found.</p>";
-    echo "<p><a href='/image-search-ecommerce/public/'>Go to Homepage</a></p>";
+    echo "<p><a href='/'>Go to Homepage</a></p>";
 }
